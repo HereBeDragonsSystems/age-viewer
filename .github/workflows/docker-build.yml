@@ -1,0 +1,24 @@
+name: "Create Couchdb Cluster booter image"
+
+on:
+  push:
+    paths:
+      - docker/Dockerfile-booter
+      - docker/init-cluster.sh
+  workflow_dispatch: # on button click
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        node-version: [22]  # Add your desired versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to docker
+        run: echo ${{ secrets.CI_TOKEN }} | docker login ghcr.io -u USERNAME --password-stdin
+      - name: Build Age viewer
+        run: docker build -t ghcr.io/herebedragonssystems/age-viewer:$(cat package.json | jq -r '.version') -t ghcr.io/herebedragonssystems/age-viewer:latest .
+      - name: Publish Age Viewer
+        run: docker push ghcr.io/herebedragonssystems/age-viewer:$(cat package.json | jq -r '.version') && docker push ghcr.io/herebedragonssystems/age-viewer:latest
